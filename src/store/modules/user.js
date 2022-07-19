@@ -1,109 +1,65 @@
-/* import { login, logout, getInfo } from "@/api/user";
-import { getToken, setToken, removeToken } from "@/utils/auth";
-import { resetRouter } from "@/router";
+import { getToken, setToken, removeToken, setTimeStamp } from "@/utils/auth";
+import { login, getUserInfo, getUserDetailById } from "@/api/user";
 
-const getDefaultState = () => {
-  return {
-    token: getToken(),
-    name: "",
-    avatar: "",
-  };
+const state = {
+  token: getToken(),
+  //空对象,便于对getter设置快捷访问
+  userInfo: {},
 };
-
-const state = getDefaultState();
-
 const mutations = {
-  RESET_STATE: (state) => {
-    Object.assign(state, getDefaultState());
-  },
-  SET_TOKEN: (state, token) => {
+  //token相关设置
+  setToken(state, token) {
     state.token = token;
+    setToken(token);
   },
-  SET_NAME: (state, name) => {
-    state.name = name;
+  removeToken(state) {
+    state.token = null;
+    //清除本地
+    removeToken();
   },
-  SET_AVATAR: (state, avatar) => {
-    state.avatar = avatar;
+  //用户信息相关设置
+  setUserInfo(state, userInfo) {
+    state.userInfo = userInfo; // ——这样是响应式数据
+    //state.userInfo = { ...userInfo } ———— 响应式数据
+    //state.userInfo["username"] = userInfo ————不是响应式数据
+  },
+  removeUserInfo(state) {
+    state.userInfo = {};
   },
 };
-
 const actions = {
-  // user login
-  login({ commit }, userInfo) {
-    const { username, password } = userInfo;
-    return new Promise((resolve, reject) => {
-      login({ username: username.trim(), password: password })
-        .then((response) => {
-          const { data } = response;
-          commit("SET_TOKEN", data.token);
-          setToken(data.token);
-          resolve();
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
+  //把请求的axios封装到vuex
+  //登录
+  async login(context, data) {
+    const result = await login(data);
+    //经过响应拦截器，不需要判断
+    /*  if (result.data.success) {
+      context.commit("setToken", result.data.data);
+    } */
+    context.commit("setToken", result);
+    //记录时间
+    setTimeStamp();
   },
-
-  // get user info
-  getInfo({ commit, state }) {
-    return new Promise((resolve, reject) => {
-      getInfo(state.token)
-        .then((response) => {
-          const { data } = response;
-
-          if (!data) {
-            return reject("Verification failed, please Login again.");
-          }
-
-          const { name, avatar } = data;
-
-          commit("SET_NAME", name);
-          commit("SET_AVATAR", avatar);
-          resolve(data);
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
+  //登出
+  logOut(context) {
+    context.commit("removeToken");
+    context.commit("removeUserInfo");
   },
-
-  // user logout
-  logout({ commit, state }) {
-    return new Promise((resolve, reject) => {
-      logout(state.token)
-        .then(() => {
-          removeToken(); // must remove  token  first
-          resetRouter();
-          commit("RESET_STATE");
-          resolve();
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
-  },
-
-  // remove token
-  resetToken({ commit }) {
-    return new Promise((resolve) => {
-      removeToken(); // must remove  token  first
-      commit("RESET_STATE");
-      resolve();
-    });
+  //获取用户信息
+  async getUserInfo(context) {
+    const result = await getUserInfo();
+    //获取用户信息【头像】
+    const baseInfo = await getUserDetailById(result.userId);
+    //把两者的信息都拼接上去，形成完整的用户信息
+    context.commit("setUserInfo", { ...result, ...baseInfo });
+    //后期做权限需要
+    return result;
   },
 };
- */
-/* export default {
-  namespaced: true,
-  state,
-  mutations,
-  actions
-} */
 
 export default {
   namespaced: true,
-  state: {},
-  mutations: {},
-  actions: {},
+  state,
+  mutations,
+  actions,
 };

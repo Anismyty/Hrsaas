@@ -1,11 +1,12 @@
-import Vue from "vue";
-import Vuex from "vuex";
-import getters from "./getters";
-import app from "./modules/app";
-import settings from "./modules/settings";
-import user from "./modules/user";
+import Vue from 'vue'
+import Vuex from 'vuex'
+import getters from './getters'
+import app from './modules/app'
+import settings from './modules/settings'
+import user from './modules/user'
+import permission from './modules/permission'
 
-Vue.use(Vuex);
+Vue.use(Vuex)
 
 const store = new Vuex.Store({
   //没有设置根级别的state、mutation等
@@ -14,9 +15,10 @@ const store = new Vuex.Store({
     app,
     settings,
     user,
+    permission
   },
   //开放了一个根级别的getters
-  getters,
-});
+  getters
+})
 
-export default store;
+export default store

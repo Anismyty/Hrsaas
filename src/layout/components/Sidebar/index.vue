@@ -1,5 +1,5 @@
 <template>
-  <div :class="{'has-logo':showLogo}">
+  <div :class="{ 'has-logo': showLogo }">
     <logo v-if="showLogo" :collapse="isCollapse" />
     <el-scrollbar wrap-class="scrollbar-wrapper">
       <el-menu
@@ -27,19 +27,21 @@ import variables from '@/styles/variables.scss'
 export default {
   components: { SidebarItem, Logo },
   computed: {
-    ...mapGetters([
-      'sidebar'
-    ]),
-    routes() {
+    ...mapGetters(['sidebar', 'routes']),
+    //根据路由数据自动渲染侧边栏,但是不是响应的，不跟addRoutes联动
+    /*routes() {
       return this.$router.options.routes
-    },
+    }, */
     activeMenu() {
+      // console.log(...mapGetters(['currentMenu']))
       const route = this.$route
       const { meta, path } = route
       // if set path, the sidebar will highlight the path you set
       if (meta.activeMenu) {
         return meta.activeMenu
       }
+      /* 把路径存到vuex */
+      this.$store.commit('app/selectMenu', route)
       return path
     },
     showLogo() {
